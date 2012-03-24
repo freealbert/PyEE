@@ -1,0 +1,27 @@
+clc;
+clear;
+close all;
+
+cd e:/
+cd DIP
+cd exp_3
+
+test3_2_0 = imread('../images/test3_2.jpg');
+test3_2_0 = im2double(test3_2_0);
+subplot(131);
+imshow(test3_2_0);
+title('original image');
+
+h1 = fspecial('average',[5,5]);
+t1 = clock;
+test3_2_1 = filter2(h1,test3_2_0);
+t2 = clock;
+subplot(132);
+imshow(test3_2_1);
+title_str = sprintf(
+title('time is %f s'%
+
+
+test3_2_2 = nlfilter(test3_2_0,[5,5],@mean2);
+subplot(133);
+imshow(test3_2_2);
