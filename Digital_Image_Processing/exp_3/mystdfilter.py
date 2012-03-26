@@ -6,7 +6,8 @@ import matplotlib.cm as cm
 import numpy as np
 import Image
 
-def mystdfilter(im_0,im_1,R,C):
+def mystdfilter(im_0,im_1,size):
+    [R,C] = size
     # im_0为原始图像
     # im_1 为经过均值滤波后的图像
     # 图像必须为double类型，才能进行数学操作
