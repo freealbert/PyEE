@@ -17,7 +17,6 @@ def histeq(image_0):
     # s_1的索引号和值构成了灰度变化曲线
     # s_2将s_1整数化
     s_1 = np.asarray([0.0]*256)
-    log_file.write('s_1\\')
     for i in range(256):
         for j in range(i+1):
             s_1[i] += prob_0[j] 
@@ -31,6 +30,38 @@ def histeq(image_0):
     hist_1,x_1 = np.histogram(image_1.flatten(),bins=256,range=(0,256))
     return(image_1,hist_1,hist_0,x_1,x_0)
     
+def histmatch(image_0,vector):
+    vector = np.asarray(vector)
+    image_1 = image_0.copy()
+    # 计算期望输出图像的指定直方图更灰度值的概率
+    p_z = vector/float(np.sum(vector))
+    # 对p(z)积分得到G(z),也就是v_k
+    v = np.asarray([0.0]*256)
+    for i in range(256):
+        for j in range(i+1):
+            v[i] += p_z[j]
+    v = v*255
+    G = v.copy()
+    # 原图像是unit8
+    (M,N) = image_0.shape
+    hist_r,r = np.histogram(image_0.flatten(),bins=256,range=(0,256))
+    p_r = hist_r/float(M*N)
+    s = np.asarray([0.0]*256)
+    # 计算归一化的灰度值s,也就是T(r)
+    for i in range(256):
+        for j in range(i+1):
+            s[i] += p_r[j]
+    s = s*255
+    T = s.copy()
+    flatten_image_0 = image_0.flatten()
+    flatten_image_1 = image_1.flatten()
+    for r_k in range(256):
+        s_k = T[r_k]
+        z_k = float(v[np.argwhere(v >= s_k)][0])
+        flatten_image_1[np.argwhere(flatten_image_0 == r_k)] = z_k
+    image_1 = flatten_image_1.reshape(M,N)
+    return image_1
+
 def meanfilt(im_0,size):
     (R,C) = size
     im_1 = im_0.copy()
@@ -65,7 +96,7 @@ def h_sobel(im_0):
     im_1 = im_0.copy()
     for m in range(1,M-1):
         for n in range(1,N-1):
-            im_1[m,n] = np.abs(-im_0[m-1,n-1]-2*im_0[m-1,n]-im_0[m-1,n+1]+im_0[m+1,n-1]+2*im_0[m+1,n]+im_0[m+1,n+1])
+            im_1[m,n] = np.abs(-im_0[m-1,n-1]-2*im_0[m-1,n]-im_0[m-1,n+1]+im_0[m+1,n-1]+2*im_0[m+1,n]+im_0[m+1,n+1])/8
     return im_1
 
 def v_sobel(im_0):
@@ -74,7 +105,7 @@ def v_sobel(im_0):
     im_1 = im_0.copy()
     for m in range(1,M-1):
         for n in range(1,N-1):
-            im_1[m,n] = np.abs(-im_0[m-1,n-1]+im_0[m-1,n+1]-2*im_0[m,n-1]+2*im_0[m,n+1]-im_0[m+1,n-1]+im_0[m+1,n+1])
+            im_1[m,n] = np.abs(-im_0[m-1,n-1]+im_0[m-1,n+1]-2*im_0[m,n-1]+2*im_0[m,n+1]-im_0[m+1,n-1]+im_0[m+1,n+1])/8
     return im_1
 
 def sobel(im_0):
@@ -83,10 +114,13 @@ def sobel(im_0):
     im_1 = im_0.copy()
     for m in range(1,M-1):
         for n in range(1,N-1):
-            im_1[m,n] = np.abs(-im_0[m-1,n-1]+im_0[m-1,n+1]-2*im_0[m,n-1]+2*im_0[m,n+1]-im_0[m+1,n-1]+im_0[m+1,n+1])
+            im_1[m,n] = np.abs(-im_0[m-1,n-1]+im_0[m-1,n+1]-2*im_0[m,n-1]+2*im_0[m,n+1]-im_0[m+1,n-1]+im_0[m+1,n+1])/8
     return im_1
 
-
+def d_sobel(im_0):
+    (M,N) = im_0.shape
+    im_1 = np.sqrt((v_sobel(im_0)**2)+(h_sobel(im_0)**2))
+    return im_1
 def laplacian(im_0):
     lap = np.array([[0,-1,0],[-1,4,-1],[0,-1,0]])
     (M,N) = im_0.shape
@@ -119,7 +153,12 @@ def Roberts(im_0,T,L_G=255,L_B=0):
     im_1 = im_0.copy()
     for m in range(M-1):
         for n in range(N-1):
-            g = np.abs(im_0[m,n]-im_0[m+1,n+1]) + np.abs(im_0[m+1,n]-im_0[m,n+1])
+            a1 = float(im_0[m,n])
+            a2 = float(im_0[m,n+1])
+            a3 = float(im_0[m+1,n])
+            a4 = float(im_0[m+1,n+1])
+            g = abs(a1-a4) + abs(a2-a3)
+            #g = float(np.abs(im_0[m,n]-im_0[m+1,n+1])) + float(np.abs(im_0[m+1,n]-im_0[m,n+1]))
             if g >= T:
                 im_1[m,n] = L_G
             else:
