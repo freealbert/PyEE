@@ -42,7 +42,7 @@ ax_1.set_xlabel('t/s')
 
 ax_2 = fig.add_subplot(212)
 pinlv = np.linspace(-f_s/2,f_s/2,len(z))
-ax_2.plot(pinlv,z)
+ax_2.stem(pinlv,z)
 ax_2.set_ylim(bottom=0,top=1600)
 ax_2.set_xlim(left=-4,right=4)
 ax_2.set_xlabel('f/Hz')
