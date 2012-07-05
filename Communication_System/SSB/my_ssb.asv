@@ -1,0 +1,227 @@
+clc;
+clear;
+close all;
+N = 1000;
+fs = 1000;
+dt = 0.001;
+t = 0:dt:1;
+f0 = 10;
+fc = 50;
+
+%% figure 1 ,  调制信号 
+mt_t = cos(2*pi*f0*t);
+subplot(2,1,1);
+plot(t,mt_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('调制信号时域波形');
+% frequence domain
+mt_f = fftshift(abs(fft(mt_t)));
+mt_f_list = [0:N]*fs/N-fs/2;
+subplot(2,1,2);
+stem(mt_f_list,mt_f);
+axis([-15,15,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('调制信号频谱');
+
+%% figure 2 , 载波
+figure;
+fc = 50;
+carrier_cos_t = cos(2*pi*fc*t);
+carrier_sin_t = sin(2*pi*fc*t);
+subplot(2,1,1);
+plot(t,carrier_cos_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('载波时域波形');
+% frequence domain
+carrier_cos_f = fftshift(abs(fft(carrier_cos_t)));
+carrier_cos_f_list = [0:N]*fs/N-fs/2;
+subplot(2,1,2);
+stem(carrier_cos_f_list,carrier_cos_f);
+axis([-60,60,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('载波频谱');
+
+%% figure 3, 上下边带信号
+figure;
+% 基带信号的希尔伯特变换
+mt_t_hat = imag(hilbert(mt_t));
+ssb_t_up_t = mt_t.*carrier_cos_t-mt_t_hat.*carrier_sin_t;
+ssb_t_down_t = mt_t.*carrier_cos_t+mt_t_hat.*carrier_sin_t;
+subplot(4,1,1);
+plot(t,ssb_t_up_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('上边带信号时域波形');
+subplot(4,1,3);
+plot(t,ssb_t_down_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('下边带信号时域波形');
+% up side frequence domain
+ssb_t_up_f = fftshift(abs(fft(ssb_t_up_t)));
+ssb_t_up_f_list = [0:N]*fs/N-fs/2;
+subplot(4,1,2);
+stem(ssb_t_up_f_list,ssb_t_up_f);
+axis([-70,70,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('上边带信号频谱');
+% down side 
+ssb_t_down_f = fftshift(abs(fft(ssb_t_down_t)));
+ssb_t_down_f_list = [0:N]*fs/N-fs/2;
+subplot(4,1,4);
+stem(ssb_t_down_f_list,ssb_t_down_f);
+axis([-70,70,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('下边带信号频谱');
+%% figure 4 ,接收端接收到的带5dB AWGN的信号
+figure;
+ssb_r_up_t = awgn(ssb_t_up_t,5,'measured','dB');
+ssb_r_down_t = awgn(ssb_t_down_t,5,'measured','dB');
+subplot(4,1,1);
+plot(t,ssb_r_up_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('带5dB AWGN上边带信号时域波形');
+subplot(4,1,3);
+plot(t,ssb_r_down_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('带5dB AWGN下边带信号时域波形');
+% up side frequence domain
+ssb_r_up_f = fftshift(abs(fft(ssb_r_up_t)));
+ssb_r_up_f_list = [0:N]*fs/N-fs/2;
+subplot(4,1,2);
+stem(ssb_r_up_f_list,ssb_r_up_f);
+axis([-70,70,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('带5dB AWGN上边带信号频谱');
+% down side 
+ssb_r_down_f = fftshift(abs(fft(ssb_r_down_t)));
+ssb_r_down_f_list = [0:N]*fs/N-fs/2;
+subplot(4,1,4);
+stem(ssb_r_down_f_list,ssb_r_down_f);
+axis([-70,70,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('带5dB AWGN下边带信号频谱');
+
+%% figure 5 , 上下边带经过带通滤波器后的信号
+figure;
+Rp = 3;
+Rs = 40;
+% up side
+Wp_up = [55,65]/(fs/2);
+Ws_up = [45,75]/(fs/2);
+[N_But_up,Wn_up] = buttord(Wp_up,Ws_up,Rp,Rs,'s');
+[B_up,A_up] = butter(N_But_up,Wn_up,'bandpass');
+ssb_bp_up_t = filtfilt(B_up,A_up,ssb_t_up_t);
+subplot(4,1,1);
+plot(t,ssb_bp_up_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('通过带通滤波器后上边带信号的时域波形');
+ssb_bp_up_f = fftshift(abs(fft(ssb_bp_up_t)));
+ssb_bp_up_f_list = [0:N]*fs/N -fs/2;
+subplot(4,1,2);
+stem(ssb_bp_up_f_list,ssb_bp_up_f);
+axis([-70,70,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v');
+title('通过带通滤波器后上边带信号的频谱');
+% down side
+Wp_down = [35,45]/(fs/2);
+Ws_down = [25,55]/(fs/2);
+[N_But_down,Wn_down] = buttord(Wp_down,Ws_down,Rp,Rs,'s');
+[B_down,A_down] = butter(N_But_down,Wn_down,'bandpass');
+ssb_bp_down_t = filtfilt(B_down,A_down,ssb_t_down_t);
+subplot(4,1,3);
+plot(t,ssb_bp_down_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('通过带通滤波器后下边带信号的时域波形');
+ssb_bp_down_f = fftshift(abs(fft(ssb_bp_down_t)));
+ssb_bp_down_f_list = [0:N]*fs/N -fs/2;
+subplot(4,1,4);
+stem(ssb_bp_down_f_list,ssb_bp_down_f);
+axis([-70,70,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v');
+title('通过带通滤波器后下边带信号的频谱');
+
+%% figure 6 , 与本地载波相乘后的信号
+figure;
+% up side
+temp_up_t = ssb_bp_up_t.*carrier_cos_t;
+subplot(4,1,1);
+plot(t,temp_up_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('上边带信号与本地载波相乘后信号的时域波形');
+temp_up_f = fftshift(abs(fft(temp_up_t)));
+temp_up_f_list = [0:N]*fs/N-fs/2;
+subplot(4,1,2);
+stem(temp_up_f_list,temp_up_f);
+axis([-120,120,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('上边带信号与本地载波相乘后信号的频谱');
+% down side
+temp_down_t = ssb_bp_down_t.*carrier_cos_t;
+subplot(4,1,3);
+plot(t,temp_down_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('下边带信号与本地载波相乘后信号的时域波形');
+temp_down_f = fftshift(abs(fft(temp_down_t)));
+temp_down_f_list = [0:N]*fs/N-fs/2;
+subplot(4,1,4);
+stem(temp_down_f_list,temp_down_f);
+axis([-120,120,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v')
+title('下边带信号与本地载波相乘后信号的频谱');
+
+%% figure 7 , 经过低通滤波器后的波形
+Wp = 10/(fs/2);
+Ws = 20/(fs/2);
+Rp = 3;
+Rs = 40;
+[N_But,Wn] = buttord(Wp,Ws,Rp,Rs,'s');
+[B,A] = butter(N_But,Wn,'low');
+mr_up_t = filtfilt(B,A,temp_up_t);
+mr_down_t = filtfilt(B,A,temp_down_t);
+subplot(4,1,1);
+plot(t,mr_up_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('上边带解调信号的时域波形');
+mr_up_f = fftshift(abs(fft(mr_up_t)));
+mr__up_f_list = [0:N]*fs/N -fs/2;
+subplot(4,1,2);
+stem(mr_up_f_list,mr_up_f);
+axis([-15,15,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v');
+title('上边带解调信号的频谱');
+% down side
+subplot(4,1,3);
+plot(t,mr_down_t);
+xlabel('时间/t');
+ylabel('幅度/v');
+title('下边带解调信号的时域波形');
+mr_down_f = fftshift(abs(fft(mr_down_t)));
+mr__down_f_list = [0:N]*fs/N -fs/2;
+subplot(4,1,24);
+stem(mr_down_f_list,mr_down_f);
+axis([-15,15,0,600]);
+xlabel('频率/Hz');
+ylabel('幅度/v');
+title('下边带解调信号的频谱');
+'finished'
