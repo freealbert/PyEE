@@ -1,0 +1,65 @@
+\documentclass{article}
+\usepackage[colorlinks,linkcolor=red,anchorcolor=blue,citecolor=green]{hyperref}
+\usepackage{tikz}
+% \usepackage{KOMA}
+\usetikzlibrary{shapes,snakes}
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{caption}
+\XeTeXlinebreaklocale "zh" %针对中文进行断行
+% \setmainfont{Microsoft YaHei} %设置默认的字体
+% \setmainfont{FZShouJinShu-S10}
+% \setmainfont{Hiragino Sans GB}
+\setmainfont{Hiragino Sans GB}
+\begin{document}
+\tikzstyle{mybox} = [draw=blue, fill=green!20, very thick ,rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
+\tikzstyle{fancytitle} = [fill=blue,text=white]
+{\setmainfont{FZShouJinShu-S10}
+\title{{\setmainfont{FZShouJinShu-S10}\bf{PyEE之数字信号处理篇}}}
+\author{freealbert\\\href{http://dspandlinux.com}{http://dspandlinux.com}}
+\maketitle
+}
+\section{Introduction}
+
+Hello, 大家好,PyEE新番上市!\\
+
+作为PyEE走入课堂的一次尝试，考虑到很多同学尚未接触过EE专业必学必会的Matlab，为了降低难度，DSP部分将给出所有仿真程序的Python代码作为参考，教师可以指导学生使用Matlab完成实验。Python和Matlab一样，语法较为清晰易懂，科学计算的函数库完备且很多函数名和用法相同，甚至接口风格一样（这一直是吐槽点），作为参考再好不过，同时两者语法又不尽相同，可以确保在给学生充分提示的同时，仍旧需要查阅资料抑或help一下以学个究竟。
+
+本次实验分为两部分，简而言之，就是上采样和下采样。
+废话不多说，用愉快的心情来享受这一切吧。
+\section{Up Sampling}
+上采样，又名信号插值(interpolation)，是一个增大采样率来增加数据的过程。假设，有限长的离散时间信号$x(n),n=0,1,\cdots,N-1$，需要将采样频率$f_s$提升$L$倍，上采样后的离散序列可以表示为
+\begin{equation}
+	x_U(n)=\left\{
+	\begin{array}{ll}
+		x(n/L), & n=0,\pm L,\pm 2L,\cdots\\
+		0, & else
+	\end{array}\right.
+\end{equation}
+\begin{tikzpicture}
+\node [mybox] (Qustion_1) {经过升采样后，信号的频域波形会有何变化？};
+\node [fancytitle] at (Qustion_1.north west) {\bf {Question 1}};
+\end{tikzpicture}
+\subsection{时域和频域图像绘制 I}
+给定信号$x(t)=\sin(100\pi t)+\sin(200\pi t)$，采样频率$f_s=1000Hz$，采样时间$\tau=0.05s$
+请使用Matlab画出如下图所示的$x(t)$的时域波形和频谱图，并保存图片。\\
+{\small \setmainfont{AR PL UKai CN}{
+Tips: 对于如何画图有疑问时，最好的方法就是在Matlab的Command Window中输入 help yourFunction ，yourFunction指你需要查询的函数，你大体需要以下函数 stem,plot,fft,fftshift}}
+\subsection{时域和频域图像绘制 II}
+令$\tau$取不同值，如$0.05,0.2,\cdots$，画出$x(t)$的时域波形和频谱图。\\
+\begin{tikzpicture}
+\node [mybox] (Qustion_2) {观察频域波形有何不同，试着解释下原因。};
+\node [fancytitle] at (Qustion_2.north west) {\bf {Question 2}};
+\end{tikzpicture}\\
+{\small \setmainfont{AR PL UKai CN}{
+Tips: 当绘出全部时间的图形时，图像会显得过于密集反而不利于观测，这时可像Figure 1一样只绘出一小段时间片的图像}}
+\subsection{插值}
+令插值倍数$L=4$画出插值后信号$x'(t)$的时域和频域图。验证下是否与你在Question 2中所想的一样。
+\subsection{插值后的处理}
+\begin{enumerate}
+\item 观察插值后的时域和频域图像与插值前有何差异。
+\item 是否能够容忍这种差异？
+\item 如不能容忍，那该如何去除？
+\end{enumerate}
+我才不会告诉你要低通滤波呢。
+\end{document}

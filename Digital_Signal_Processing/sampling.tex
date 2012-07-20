@@ -1,0 +1,13 @@
+\documentclass{article}
+\usepackage{graphicx}
+\begin{document}
+
+\section{整数倍升采样}
+升采样又可以称为信号插值(interpolation)，是一个增大采样率来增加数据的过程。假设，有限长的离散时间信号$x(n),n=0,1,\cdots,N-1$。如果想要它的采样频率$f_s$提升$L$倍，则最简单便捷的方法便是将$x(n)$中美相邻两个点之间补充$L-1$个$0$，组成新的离散序列$x'(n)$，即\\
+\begin{equation}
+	x'(n)=\right{
+	\begin{array}{lr}
+		x(n/L), & n=0,\pm L,\pm 2L,\cdots\\
+		0, & else
+	\end{array}
+\end{equation}

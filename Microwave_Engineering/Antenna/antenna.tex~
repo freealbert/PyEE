@@ -1,0 +1,18 @@
+\documentclass[compress=true]{beamer}
+\usepackage{caption}
+%\usepackage{xeCJK}
+%\setCJKmainfont{WenQuanYi Zen Hei}
+\usetheme{Singapore}
+\title{Field regions and power pattens of an antenna}
+\author{\tiny{Yimian Dai,Wenbo Wang,Yu Qin,Haiyang Zhang}}
+\institute{http://dspandlinux.com}
+\begin{document}
+% frame_01
+\begin{frame}
+\titlepage
+\end{frame}
+% frame_
+\begin{frame}
+  \frametitle{Antenna radiation zoning}
+  \begin{itemize}
+    \item 
